@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:instaclone/pages/signin_page.dart';
+
+import 'home_page.dart';
 class SplashPage extends StatefulWidget {
   const SplashPage({Key? key}) : super(key: key);
 
@@ -13,13 +14,13 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
 
-  _callSignInPage(){
-    Navigator.pushReplacementNamed(context, SignInPage.id);
+  _callHomePage(){
+    Navigator.pushReplacementNamed(context, HomePage.id);
   }
 
   _initTimer(){
     Timer(const Duration(seconds: 2), (){
-      _callSignInPage();
+      _callHomePage();
     });
   }
 

@@ -32,12 +32,14 @@ class _HomePageState extends State<HomePage> {
       body: PageView(
         controller: _pageController,
         onPageChanged: (int index){
-          selectedPage = index;
+          setState(() {
+            selectedPage = index;
+          });
         },
-        children: const [
-          MyFeedPage(),
+        children: [
+          MyFeedPage(pageController: _pageController,),
           MySearchPage(),
-          MyUploadPage(),
+          MyUploadPage(pageController: _pageController,),
           MyLikePage(),
           MyProfilePage(),
         ],
