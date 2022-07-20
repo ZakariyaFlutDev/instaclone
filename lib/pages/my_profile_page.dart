@@ -19,38 +19,38 @@ class MyProfilePage extends StatefulWidget {
 }
 
 class _MyProfilePageState extends State<MyProfilePage> {
+
+  bool _isLoading = false;
   List<Post> posts = [];
+  int countPost = 0;
   File? imageFile;
   bool _isList = true;
   String fullname = "", email = "", img_url = "";
 
-  String postImg1 = "https://images7.alphacoders.com/461/461013.jpg";
-  String postImg2 =
-      "https://avatars.mds.yandex.net/i?id=64fbc395290610a625edf69848fd2a99-4451037-images-thumbs&ref=rim&n=33&w=212&h=150";
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    posts
-        .add(Post(image: postImg1, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg2, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg2, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg1, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg2, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg2, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg1, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg2, caption: "Bu test uchun yozilgan ma'lumot"));
-    posts
-        .add(Post(image: postImg2, caption: "Bu test uchun yozilgan ma'lumot"));
     _apiLoadUser();
+    _apiLoadPosts();
+  }
+
+  void _apiLoadPosts(){
+    setState(() {
+      _isLoading = true;
+    });
+    DataService.loadPosts().then((value) => {
+      _respLoadPosts(value),
+    });
+  }
+
+  void _respLoadPosts(List<Post> post){
+    setState(() {
+      posts = post;
+      _isLoading = false;
+      countPost = posts.length;
+    });
   }
 
   imageFromGallery() async {
@@ -108,6 +108,10 @@ class _MyProfilePageState extends State<MyProfilePage> {
   _apiChangePhoto() {
     if (imageFile == null) return;
 
+    setState(() {
+      _isLoading = true;
+    });
+
     FileService.uploadUserImage(imageFile!)
         .then((downloadUrl) => {_apiUpdateUser(downloadUrl)});
   }
@@ -120,6 +124,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
   }
 
   _apiLoadUser() {
+    _isLoading = true;
     DataService.loadUser().then((value) => {
           _showUserInfo(value),
         });
@@ -127,6 +132,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
 
   _showUserInfo(UserModel userModel) {
     setState(() {
+      _isLoading = false;
       fullname = userModel.fullname;
       email = userModel.email;
       img_url = userModel.img_url;
@@ -154,236 +160,243 @@ class _MyProfilePageState extends State<MyProfilePage> {
             IconButton(
               icon: Icon(
                 Icons.exit_to_app,
-                color: Colors.black87,
+                color: Color.fromRGBO(245, 96, 64, 1),
               ),
               onPressed: _signOut,
             )
           ],
         ),
-        body: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(10),
-          child: Column(
-            children: [
-              //#myphoto
-              GestureDetector(
-                onTap: () {
-                  _showPicker(context);
-                },
-                child: Stack(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(2),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          border: Border.all(
-                            width: 2,
-                            color: Color.fromRGBO(245, 96, 64, 1),
-                          )),
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(35),
-                          child: img_url == null || img_url.isEmpty
-                              ? Image(
-                                  image:
-                                      AssetImage("assets/images/ic_person.jpg"),
-                                  width: 70,
-                                  height: 70,
+        body: Stack(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  //#myphoto
+                  GestureDetector(
+                    onTap: () {
+                      _showPicker(context);
+                    },
+                    child: Stack(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              border: Border.all(
+                                width: 2,
+                                color: Color.fromRGBO(245, 96, 64, 1),
+                              )),
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(35),
+                              child: img_url.isEmpty
+                                  ? Image(
+                                image:
+                                AssetImage("assets/images/ic_person.jpg"),
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                              )
+                                  : Container(
+                                width: 70,
+                                height: 70,
+                                child: CachedNetworkImage(
+                                  width: double.infinity,
+                                  imageUrl: img_url,
                                   fit: BoxFit.cover,
-                                )
-                              : Container(
-                            width: 70,
-                            height: 70,
-                            child: CachedNetworkImage(
-                              width: double.infinity,
-                              imageUrl: img_url,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) =>
-                                  CircularProgressIndicator(),
-                              errorWidget: (context, url, error) =>
-                                  Icon(Icons.error),
-                            ),
-                          )
-                      ),
+                                  placeholder: (context, url) =>
+                                      CircularProgressIndicator(),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ),
+                              )
+                          ),
+                        ),
+                        Container(
+                          width: 83,
+                          height: 83,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Icon(
+                                Icons.add_circle,
+                                color: Color.fromRGBO(245, 96, 64, 1),
+                              )
+                            ],
+                          ),
+                        )
+                      ],
                     ),
-                    Container(
-                      width: 83,
-                      height: 83,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Icon(
-                            Icons.add_circle,
-                            color: Color.fromRGBO(245, 96, 64, 1),
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
 
-              //#myinfos
-              Text(
-                fullname.toUpperCase(),
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontSize: 16),
-              ),
-              SizedBox(
-                height: 3,
-              ),
-              Text(
-                email,
-                style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black54,
-                    fontSize: 14),
-              ),
-              SizedBox(
-                height: 10,
-              ),
+                  //#myinfos
+                  Text(
+                    fullname.toUpperCase(),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontSize: 16),
+                  ),
+                  SizedBox(
+                    height: 3,
+                  ),
+                  Text(
+                    email,
+                    style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black54,
+                        fontSize: 14),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
 
-              //#myCount
-              Container(
-                height: 50,
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "298",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          SizedBox(
-                            height: 3,
-                          ),
-                          Text(
-                            "POSTS",
-                            style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black54,
-                                fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    )),
-                    Container(
-                      height: 20,
-                      width: 1,
-                      color: Colors.grey,
+                  //#myCount
+                  Container(
+                    height: 50,
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "${countPost}",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        fontSize: 16),
+                                  ),
+                                  SizedBox(
+                                    height: 3,
+                                  ),
+                                  Text(
+                                    "POSTS",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.black54,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            )),
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.grey,
+                        ),
+                        Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "2,897",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        fontSize: 16),
+                                  ),
+                                  SizedBox(
+                                    height: 3,
+                                  ),
+                                  Text(
+                                    "FOLLOWERS",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.black54,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            )),
+                        Container(
+                          height: 20,
+                          width: 1,
+                          color: Colors.grey,
+                        ),
+                        Expanded(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "543",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        fontSize: 16),
+                                  ),
+                                  SizedBox(
+                                    height: 3,
+                                  ),
+                                  Text(
+                                    "FOLLOWING",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.black54,
+                                        fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            )),
+                      ],
                     ),
-                    Expanded(
-                        child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "2,897",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          SizedBox(
-                            height: 3,
-                          ),
-                          Text(
-                            "FOLLOWERS",
-                            style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black54,
-                                fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    )),
-                    Container(
-                      height: 20,
-                      width: 1,
-                      color: Colors.grey,
-                    ),
-                    Expanded(
-                        child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "543",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                fontSize: 16),
-                          ),
-                          SizedBox(
-                            height: 3,
-                          ),
-                          Text(
-                            "FOLLOWING",
-                            style: TextStyle(
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black54,
-                                fontSize: 14),
-                          ),
-                        ],
-                      ),
-                    )),
-                  ],
-                ),
-              ),
+                  ),
 
-              //#isList
-              Container(
-                height: 40,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: IconButton(
-                        icon: Icon(Icons.list),
-                        onPressed: () {
-                          setState(() {
-                            _isList = true;
-                          });
-                        },
-                      ),
+                  //#isList
+                  Container(
+                    height: 40,
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: IconButton(
+                            icon: Icon(Icons.list),
+                            onPressed: () {
+                              setState(() {
+                                _isList = true;
+                              });
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: IconButton(
+                            icon: Icon(Icons.grid_on_outlined),
+                            onPressed: () {
+                              setState(() {
+                                _isList = false;
+                              });
+                            },
+                          ),
+                        )
+                      ],
                     ),
-                    Expanded(
-                      child: IconButton(
-                        icon: Icon(Icons.grid_on_outlined),
-                        onPressed: () {
-                          setState(() {
-                            _isList = false;
-                          });
-                        },
-                      ),
-                    )
-                  ],
-                ),
-              ),
+                  ),
 
-              Expanded(
-                child: GridView.builder(
-                  itemCount: posts.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: _isList ? 1 : 2),
-                  itemBuilder: (ctx, i) {
-                    return _itemOfPost(posts[i]);
-                  },
-                ),
-              )
-            ],
-          ),
-        ));
+                  Expanded(
+                    child: GridView.builder(
+                      itemCount: posts.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: _isList ? 1 : 2),
+                      itemBuilder: (ctx, i) {
+                        return _itemOfPost(posts[i]);
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ),
+
+            _isLoading ? Center(child: CircularProgressIndicator(),) : SizedBox.shrink(),
+          ],
+        )
+    );
   }
 
   Widget _itemOfPost(Post post) {
@@ -394,7 +407,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
           Expanded(
             child: CachedNetworkImage(
               width: double.infinity,
-              imageUrl: post.image!,
+              imageUrl: post.img_post,
               fit: BoxFit.cover,
               placeholder: (context, url) => Center(
                 child: CircularProgressIndicator(),
@@ -406,7 +419,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             height: 5,
           ),
           Text(
-            post.caption!,
+            post.caption,
             style: TextStyle(
               color: Colors.black87.withOpacity(0.7),
             ),

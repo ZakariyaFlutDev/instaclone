@@ -19,8 +19,8 @@ class _MyLikePageState extends State<MyLikePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    items.add(Post(image: postImg1, caption: "Captions for test my INstagramm clone"));
-    items.add(Post(image: postImg2, caption: "Captions for test my INstagramm clone"));
+    items.add(Post(img_post: postImg1, caption: "Captions for test my INstagramm clone"));
+    items.add(Post(img_post: postImg2, caption: "Captions for test my INstagramm clone"));
   }
 
   @override
@@ -92,7 +92,7 @@ class _MyLikePageState extends State<MyLikePage> {
           //#image
           CachedNetworkImage(
             width: double.infinity,
-            imageUrl: post.image!,
+            imageUrl: post.img_post,
             fit: BoxFit.cover,
             placeholder: (context, url) => Center(
               child: CircularProgressIndicator(),

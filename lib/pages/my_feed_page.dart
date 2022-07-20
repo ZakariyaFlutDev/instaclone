@@ -1,5 +1,5 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:instaclone/services/data_service.dart';
 
 import '../model/post_model.dart';
 class MyFeedPage extends StatefulWidget {
@@ -14,24 +14,37 @@ class MyFeedPage extends StatefulWidget {
 }
 
 class _MyFeedPageState extends State<MyFeedPage> {
+
+  bool isLoading = false;
   List<Post> items = [];
 
-  String postImg1 = "https://images7.alphacoders.com/461/461013.jpg";
-  String postImg2 = "https://avatars.mds.yandex.net/i?id=64fbc395290610a625edf69848fd2a99-4451037-images-thumbs&ref=rim&n=33&w=212&h=150";
-  String postImg3 = "https://jooinn.com/images/beauty-of-nature-1.jpg";
 
   _addPost(){
     widget.pageController.animateToPage(2,
         duration: Duration(milliseconds: 300), curve: Curves.easeIn);
   }
 
+  void _apiLoadFeeds(){
+    setState(() {
+      isLoading = true;
+    });
+    DataService.loadFeeds().then((result) => {
+      _respLoadFeeds(result),
+    });
+  }
+
+  void _respLoadFeeds(List<Post> posts){
+    setState(() {
+      items = posts;
+      isLoading = false;
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    items.add(Post(image: postImg3, caption: "Captions for test my INstagramm clone"));
-    items.add(Post(image: postImg1, caption: "Captions for test my INstagramm clone"));
-    items.add(Post(image: postImg2, caption: "Captions for test my INstagramm clone"));
+    _apiLoadFeeds();
   }
 
   @override
@@ -45,18 +58,24 @@ class _MyFeedPageState extends State<MyFeedPage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.camera_alt, color: Colors.black,),
+            icon: Icon(Icons.camera_alt, color: Color.fromRGBO(245, 96, 64, 1),),
             onPressed: (){
               _addPost();
             },
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: items.length,
-        itemBuilder: (ctx, i){
-          return _itemOfList(items[i]);
-        },
+      body: Stack(
+        children: [
+          ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (ctx, i){
+              return _itemOfList(items[i]);
+            },
+          ),
+
+          isLoading ? Center(child: CircularProgressIndicator(),) : SizedBox.shrink(),
+        ],
       )
     );
   }
@@ -88,8 +107,8 @@ class _MyFeedPageState extends State<MyFeedPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("UserName",style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
-                        Text("March 19, 2022", style: TextStyle(color: Colors.black),)
+                        Text(post.fullname.toString(),style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+                        Text(post.date.toString(), style: TextStyle(color: Colors.black),)
                       ],
                     )
                   ],
@@ -103,14 +122,11 @@ class _MyFeedPageState extends State<MyFeedPage> {
           ),
 
           //#image
-          CachedNetworkImage(
-            width: double.infinity,
-            imageUrl: post.image!,
+          Image.network(
+            post.img_post,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width,
             fit: BoxFit.cover,
-            placeholder: (context, url) => Center(
-              child: CircularProgressIndicator(),
-            ),
-            errorWidget: (context, url, error) => Icon(Icons.error),
           ),
 
           // #likeshare
@@ -124,12 +140,27 @@ class _MyFeedPageState extends State<MyFeedPage> {
                   ),
                   IconButton(
                     onPressed: (){},
-                    icon: Icon(Icons.send_rounded),
+                    icon: Icon(Icons.share_outlined),
                   ),
 
                 ],
               )
             ],
+          ),
+
+          //#caption
+          Container(
+            width: MediaQuery.of(context).size.width,
+            margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+            child: RichText(
+              softWrap: true,
+              overflow: TextOverflow.visible,
+              text: TextSpan(
+                  children: [
+                    TextSpan(text: "${post.caption}", style: TextStyle(color:Colors.black)),
+                  ]
+              ),
+            ),
           )
         ],
       ),
