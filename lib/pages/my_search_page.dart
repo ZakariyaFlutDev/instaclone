@@ -30,6 +30,30 @@ class _MySearchPageState extends State<MySearchPage> {
     });
   }
 
+  void _apiFollowUser(UserModel someone) async{
+    setState(() {
+      _isLoading = true;
+    });
+    await DataService.followUser(someone);
+    setState(() {
+      someone.followed = true;
+      _isLoading = false;
+    });
+    DataService.storePostsToMyFeed(someone);
+  }
+
+  void _apiUnFollowUser(UserModel someone) async{
+    setState(() {
+      _isLoading = true;
+    });
+    await DataService.unfollowUser(someone);
+    setState(() {
+      someone.followed = false;
+      _isLoading = false;
+    });
+    DataService.removePostsFromMyFeed(someone);
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -162,16 +186,25 @@ class _MySearchPageState extends State<MySearchPage> {
               child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Container(
-                width: 100,
-                height: 30,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    border: Border.all(width: 1, color: Colors.grey)),
-                child: Center(
-                  child: Text("Follow"),
-                ),
-              ),
+             GestureDetector(
+               onTap: (){
+                 if(user.followed){
+                   _apiUnFollowUser(user);
+                 }else{
+                   _apiFollowUser(user);
+                 }
+               },
+               child:  Container(
+                 width: 100,
+                 height: 30,
+                 decoration: BoxDecoration(
+                     borderRadius: BorderRadius.circular(3),
+                     border: Border.all(width: 1, color: Colors.grey)),
+                 child: Center(
+                   child: user.followed ?Text("Following...") : Text("Follow"),
+                 ),
+               ),
+             )
             ],
           ))
         ],

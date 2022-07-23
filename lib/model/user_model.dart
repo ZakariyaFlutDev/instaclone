@@ -5,6 +5,11 @@ class UserModel{
   String password = "";
   String img_url = "";
 
+
+  bool followed = false;
+  int followers_count = 0;
+  int following_count = 0;
+
   UserModel({required this.fullname, required this.email, required this.password});
 
   UserModel.fromJson(Map<String,dynamic> json)
@@ -21,4 +26,8 @@ class UserModel{
     "password" : password,
     "img_url" : img_url,
   };
+
+  bool operator == (other){
+    return (other is UserModel) && other.uid == uid;
+  }
 }

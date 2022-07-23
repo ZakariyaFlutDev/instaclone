@@ -40,6 +40,28 @@ class _MyFeedPageState extends State<MyFeedPage> {
     });
   }
 
+  void _apiPostLike(Post post) async {
+    setState(() {
+      isLoading = true;
+    });
+    await DataService.likePost(post, true);
+    setState(() {
+      isLoading = false;
+      post.liked = true;
+    });
+  }
+
+  void _apiPostUnLike(Post post) async {
+    setState(() {
+      isLoading = true;
+    });
+    await DataService.likePost(post, false);
+    setState(() {
+      isLoading = false;
+      post.liked = false;
+    });
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -96,12 +118,21 @@ class _MyFeedPageState extends State<MyFeedPage> {
                 Row(
                   children: [
                     ClipRRect(
-                      child: Image(
-                        image: AssetImage("assets/images/ic_person.jpg"),
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
+                        borderRadius: BorderRadius.circular(22.5),
+                        child: post.img_user!.isEmpty ? const Image(
+                          image: AssetImage(
+                              "assets/images/ic_person.png"),
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        )
+                            : Image.network(
+                          post.img_user!,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        )
+
                     ),
                     SizedBox(width: 10,),
                     Column(
@@ -135,8 +166,14 @@ class _MyFeedPageState extends State<MyFeedPage> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: (){},
-                    icon: Icon(Icons.favorite_border),
+                    onPressed: (){
+                      if(post.liked){
+                        _apiPostUnLike(post);
+                      }else{
+                        _apiPostLike(post);
+                      }
+                    },
+                    icon: post.liked ? Icon(Icons.favorite, color: Colors.red,) : Icon(Icons.favorite_border),
                   ),
                   IconButton(
                     onPressed: (){},

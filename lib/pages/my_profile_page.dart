@@ -19,14 +19,13 @@ class MyProfilePage extends StatefulWidget {
 }
 
 class _MyProfilePageState extends State<MyProfilePage> {
-
   bool _isLoading = false;
   List<Post> posts = [];
   int countPost = 0;
   File? imageFile;
   bool _isList = true;
   String fullname = "", email = "", img_url = "";
-
+  int count_followers = 0, count_following = 0;
 
   @override
   void initState() {
@@ -36,16 +35,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
     _apiLoadPosts();
   }
 
-  void _apiLoadPosts(){
+  void _apiLoadPosts() {
     setState(() {
       _isLoading = true;
     });
     DataService.loadPosts().then((value) => {
-      _respLoadPosts(value),
-    });
+          _respLoadPosts(value),
+        });
   }
 
-  void _respLoadPosts(List<Post> post){
+  void _respLoadPosts(List<Post> post) {
     setState(() {
       posts = post;
       _isLoading = false;
@@ -136,6 +135,8 @@ class _MyProfilePageState extends State<MyProfilePage> {
       fullname = userModel.fullname;
       email = userModel.email;
       img_url = userModel.img_url;
+      count_following = userModel.following_count;
+      count_followers = userModel.followers_count;
     });
   }
 
@@ -192,26 +193,25 @@ class _MyProfilePageState extends State<MyProfilePage> {
                               borderRadius: BorderRadius.circular(35),
                               child: img_url.isEmpty
                                   ? Image(
-                                image:
-                                AssetImage("assets/images/ic_person.jpg"),
-                                width: 70,
-                                height: 70,
-                                fit: BoxFit.cover,
-                              )
+                                      image: AssetImage(
+                                          "assets/images/ic_person.jpg"),
+                                      width: 70,
+                                      height: 70,
+                                      fit: BoxFit.cover,
+                                    )
                                   : Container(
-                                width: 70,
-                                height: 70,
-                                child: CachedNetworkImage(
-                                  width: double.infinity,
-                                  imageUrl: img_url,
-                                  fit: BoxFit.cover,
-                                  placeholder: (context, url) =>
-                                      CircularProgressIndicator(),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
-                                ),
-                              )
-                          ),
+                                      width: 70,
+                                      height: 70,
+                                      child: CachedNetworkImage(
+                                        width: double.infinity,
+                                        imageUrl: img_url,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) =>
+                                            CircularProgressIndicator(),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(Icons.error),
+                                      ),
+                                    )),
                         ),
                         Container(
                           width: 83,
@@ -263,29 +263,29 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       children: [
                         Expanded(
                             child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "${countPost}",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        fontSize: 16),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    "POSTS",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.black54,
-                                        fontSize: 14),
-                                  ),
-                                ],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "${countPost}",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
                               ),
-                            )),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                "POSTS",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black54,
+                                    fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )),
                         Container(
                           height: 20,
                           width: 1,
@@ -293,29 +293,29 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         ),
                         Expanded(
                             child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "2,897",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        fontSize: 16),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    "FOLLOWERS",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.black54,
-                                        fontSize: 14),
-                                  ),
-                                ],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                count_followers.toString(),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
                               ),
-                            )),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                "FOLLOWERS",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black54,
+                                    fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )),
                         Container(
                           height: 20,
                           width: 1,
@@ -323,29 +323,29 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         ),
                         Expanded(
                             child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "543",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        fontSize: 16),
-                                  ),
-                                  SizedBox(
-                                    height: 3,
-                                  ),
-                                  Text(
-                                    "FOLLOWING",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.black54,
-                                        fontSize: 14),
-                                  ),
-                                ],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                count_following.toString(),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 16),
                               ),
-                            )),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                "FOLLOWING",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.normal,
+                                    color: Colors.black54,
+                                    fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        )),
                       ],
                     ),
                   ),
@@ -357,7 +357,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       children: [
                         Expanded(
                           child: IconButton(
-                            icon: Icon(Icons.list),
+                            icon: Icon(
+                              Icons.list,
+                              size: _isList ? 24 : 20,
+                              color: _isList  ? Colors.black : Colors.grey,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _isList = true;
@@ -367,7 +371,11 @@ class _MyProfilePageState extends State<MyProfilePage> {
                         ),
                         Expanded(
                           child: IconButton(
-                            icon: Icon(Icons.grid_on_outlined),
+                            icon: Icon(
+                              Icons.grid_view,
+                              size: _isList ? 20 : 24,
+                              color: _isList ? Colors.grey : Colors.black,
+                            ),
                             onPressed: () {
                               setState(() {
                                 _isList = false;
@@ -392,11 +400,13 @@ class _MyProfilePageState extends State<MyProfilePage> {
                 ],
               ),
             ),
-
-            _isLoading ? Center(child: CircularProgressIndicator(),) : SizedBox.shrink(),
+            _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : SizedBox.shrink(),
           ],
-        )
-    );
+        ));
   }
 
   Widget _itemOfPost(Post post) {

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:instaclone/services/data_service.dart';
 
 import '../model/post_model.dart';
 class MyLikePage extends StatefulWidget {
@@ -11,16 +12,37 @@ class MyLikePage extends StatefulWidget {
 
 class _MyLikePageState extends State<MyLikePage> {
   List<Post> items = [];
+  bool isLoading = false;
 
-  String postImg1 = "https://images7.alphacoders.com/461/461013.jpg";
-  String postImg2 = "https://avatars.mds.yandex.net/i?id=64fbc395290610a625edf69848fd2a99-4451037-images-thumbs&ref=rim&n=33&w=212&h=150";
+  _apiLoadLikes(){
+    setState(() {
+      isLoading = true;
+    });
+    DataService.loadLikes().then((value) => {
+      _respLoadLikes(value),
+    });
+  }
+
+  _respLoadLikes(List<Post> likePosts){
+    setState(() {
+      items = likePosts;
+      isLoading = false;
+    });
+  }
+
+  void _apiPostUnlike(Post post) async{
+    setState(() {
+      isLoading = true;
+    });
+    await DataService.likePost(post, false);
+    _apiLoadLikes();
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    items.add(Post(img_post: postImg1, caption: "Captions for test my INstagramm clone"));
-    items.add(Post(img_post: postImg2, caption: "Captions for test my INstagramm clone"));
+    _apiLoadLikes();
   }
 
   @override
@@ -39,11 +61,16 @@ class _MyLikePageState extends State<MyLikePage> {
             )
           ],
         ),
-        body: ListView.builder(
-          itemCount: items.length,
-          itemBuilder: (ctx, i){
-            return _itemOfList(items[i]);
-          },
+        body: Stack(
+          children: [
+            items.length > 0 ? ListView.builder(
+              itemCount: items.length,
+              itemBuilder: (ctx, i){
+                return _itemOfList(items[i]);
+              },
+            ) : Center(child: Text("Likes Posts No"),),
+            isLoading ? Center(child: CircularProgressIndicator()) : SizedBox.shrink(),
+          ],
         )
     );
   }
@@ -64,19 +91,28 @@ class _MyLikePageState extends State<MyLikePage> {
                 Row(
                   children: [
                     ClipRRect(
-                      child: Image(
-                        image: AssetImage("assets/images/ic_person.jpg"),
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      ),
+                        borderRadius: BorderRadius.circular(22.5),
+                        child: post.img_user!.isEmpty ? const Image(
+                          image: AssetImage(
+                              "assets/images/ic_person.png"),
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        )
+                            : Image.network(
+                          post.img_user!,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        )
+
                     ),
                     SizedBox(width: 10,),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("UserName",style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
-                        Text("March 19, 2022", style: TextStyle(color: Colors.black),)
+                        Text(post.fullname.toString(),style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+                        Text(post.date.toString(), style: TextStyle(color: Colors.black),)
                       ],
                     )
                   ],
@@ -91,7 +127,8 @@ class _MyLikePageState extends State<MyLikePage> {
 
           //#image
           CachedNetworkImage(
-            width: double.infinity,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.width,
             imageUrl: post.img_post,
             fit: BoxFit.cover,
             placeholder: (context, url) => Center(
@@ -106,12 +143,16 @@ class _MyLikePageState extends State<MyLikePage> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: (){},
+                    onPressed: (){
+                      if(post.liked){
+                        _apiPostUnlike(post);
+                      }
+                    },
                     icon: Icon(Icons.favorite, color: Colors.red,),
                   ),
                   IconButton(
                     onPressed: (){},
-                    icon: Icon(Icons.send_rounded),
+                    icon: Icon(Icons.share_outlined),
                   ),
 
                 ],
